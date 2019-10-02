@@ -7,6 +7,7 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,7 +18,6 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
-import com.google.gson.JsonObject;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -28,6 +28,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +42,10 @@ public class SpotifyConnector {
 
     private static final String CLIENT_ID = "4f7eda6cbb9a4475b1ab551d41f4430f";
     private static final String REDIRECT_URI = "com.test.spotify://callback";
-    private static final String SCOPES = "user-read-recently-played,user-library-modify,user-read-email,user-read-private";
+    private static final String SCOPES = "user-read-recently-played,user-library-modify,user-read-email,user-read-private" +
+            ",playlist-modify-private,user-read-private,playlist-read-private,user-library-modify," +
+            "user-follow-modify,user-read-currently-playing,user-read-recently-played,user-read-email," +
+            "user-library-read,user-top-read,user-follow-read,user-read-playback-state,user-modify-playback-state";
     public static final int REQUEST_CODE = 1337;
 
     public SpotifyConnector(AppCompatActivity context) {
@@ -109,6 +113,8 @@ public class SpotifyConnector {
                 null,
                 (Response.Listener<org.json.JSONObject>) response -> {
                     try {
+                        MainActivity.playLists = new ArrayList<>();
+
                         JSONArray array = response.getJSONArray("items");
 
                         for (int i = 0; i < array.length(); i++){
@@ -118,7 +124,7 @@ public class SpotifyConnector {
                                joObject.getJSONArray("images").getJSONObject(0).getString("url"),
                                joObject.getString("name"),
                                joObject.getJSONObject("tracks").getString("href"),
-                               Integer.parseInt(joObject.getJSONObject("tracks").getString("total"))
+                               joObject.getJSONObject("tracks").getString("total")
                             ));
                         }
 
@@ -139,6 +145,40 @@ public class SpotifyConnector {
                 return params;
             }
         };
+    }
+
+    public void updatePlayList(Context context, PlayList playList) {
+        RequestQueue mRequestQueue = Volley.newRequestQueue(context);
+
+        JSONObject body = new JSONObject();
+
+        try {
+            body.put("name", playList.getName());
+            body.put("description", "ll");
+            body.put("public", false);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        mRequestQueue.add(new JsonObjectRequest(Request.Method.PUT, SpotifyURL.UPDATE_PLAY_LIST + playList.getId(),
+                body,
+                (Response.Listener<org.json.JSONObject>) response -> {
+                    Toast.makeText(context,
+                            "Update PlayList successfully",
+                            Toast.LENGTH_LONG).show();
+                },
+                (Response.ErrorListener) error -> Toast.makeText(context,
+                        "Update PlayList successfully",
+                        Toast.LENGTH_LONG).show()) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<>();
+                params.put("Authorization", "Bearer " + MainActivity.tokenUser);
+                params.put("Content-Type", "application/json");
+
+                return params;
+            }
+        });
     }
 
     private void extractUserInformation(JSONObject response, TextView lblUserName, TextView lblFollowers, ImageView imgUser) {

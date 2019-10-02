@@ -3,9 +3,12 @@ package com.test.spotify;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -19,8 +22,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private SpotifyConnector spotifyConnector;
-    private String tokenUser;
+    public static SpotifyConnector spotifyConnector;
+    public static String tokenUser;
     private TextView lblUserName, lblFollowers;
     private ImageView imgUser;
     private ListView lstPlayList;
@@ -31,13 +34,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        this.spotifyConnector = new SpotifyConnector(this);
-        this.spotifyConnector.connect();
+        spotifyConnector = new SpotifyConnector(this);
+        spotifyConnector.connect();
 
         this.lblUserName = findViewById(R.id.lblUserName);
         this.lblFollowers = findViewById(R.id.lblFollowers);
         this.imgUser = findViewById(R.id.imgUser);
         this.lstPlayList = findViewById(R.id.lstPlayLists);
+
+        this.onClickPlayList();
     }
 
     @Override
@@ -50,13 +55,13 @@ public class MainActivity extends AppCompatActivity {
             switch (response.getType()) {
 
                 case TOKEN:
-                    this.spotifyConnector.setEditor(getSharedPreferences("SPOTIFY", 0).edit());
-                    this.tokenUser = response.getAccessToken();
-                    this.spotifyConnector.getEditor().putString("token", this.tokenUser);
-                    Log.i("Connect successfully", this.tokenUser);
-                    this.spotifyConnector.getEditor().apply();
+                    spotifyConnector.setEditor(getSharedPreferences("SPOTIFY", 0).edit());
+                    tokenUser = response.getAccessToken();
+                    spotifyConnector.getEditor().putString("token", tokenUser);
+                    Log.i("Connect successfully", tokenUser);
+                    spotifyConnector.getEditor().apply();
                     try {
-                        this.spotifyConnector.extractDataUser(this.tokenUser,
+                        spotifyConnector.extractDataUser(tokenUser,
                                 this.lblUserName,
                                 this.lblFollowers,
                                 this.imgUser,
@@ -76,5 +81,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void onClickPlayList() {
+        Context those = this;
+        this.lstPlayList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                PlayList playList = playLists.get(i);
 
+                Intent intent = new Intent(those, PlayListDetailActivity.class);
+
+                intent.putExtra("playList", playList);
+
+                startActivity(intent);
+            }
+        });
+    }
 }

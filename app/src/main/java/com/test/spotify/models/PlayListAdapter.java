@@ -35,7 +35,7 @@ public class PlayListAdapter extends ArrayAdapter<PlayList> {
         ImageView imgPlayList = item.findViewById(R.id.imgPlayList);
         Picasso.with(item.getContext()).load(playLists.get(position).getImage()).into(imgPlayList);
 
-        TextView lblNumTracks = item.findViewById(R.id.lblPlayListName);
+        TextView lblNumTracks = item.findViewById(R.id.lblNumTracks);
         lblNumTracks.setText(playLists.get(position).getCountTracks());
 
         return(item);

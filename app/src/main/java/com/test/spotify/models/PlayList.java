@@ -1,23 +1,17 @@
 package com.test.spotify.models;
 
-import android.content.Context;
-import android.widget.ArrayAdapter;
+import java.io.Serializable;
 
-import com.test.spotify.R;
-
-import java.util.ArrayList;
-import java.util.List;
-
-public class PlayList {
+public class PlayList implements Serializable {
 
     private String id;
     private String image;
     private String name;
     private String tracksURL;
-    private int countTracks;
+    private String  countTracks;
     private PlayList playList;
 
-    public PlayList(String id, String image, String name, String tracksURL, int countTracks) {
+    public PlayList(String id, String image, String name, String tracksURL, String countTracks) {
         this.id = id;
         this.image = image;
         this.name = name;
@@ -58,11 +52,11 @@ public class PlayList {
         this.tracksURL = tracksURL;
     }
 
-    public int getCountTracks() {
+    public String getCountTracks() {
         return countTracks;
     }
 
-    public void setCountTracks(int countTracks) {
+    public void setCountTracks(String countTracks) {
         this.countTracks = countTracks;
     }
 
